@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiGoogleDriveIntegration.MainPage"
+             BindingContext="{Binding Source={StaticResource Locator}}"
+             >
+
+    <ScrollView>
+        <VerticalStackLayout
+            Spacing="25"
+            Padding="30,0"
+            VerticalOptions="Center">
+
+            <Frame BackgroundColor="#2196F3"
+                   Padding="24"
+                   CornerRadius="0">
+                <Label Text="Google Drive Integration Test"
+                       HorizontalTextAlignment="Center"
+                       TextColor="White"
+                       FontSize="36" />
+            </Frame>
+
+            <StackLayout Margin="20,0">
+                <Button Text="Web Login"
+                        Command="{Binding MainPageViewModel.Command_WebLogin}" />
+
+                <StackLayout IsEnabled="{Binding MainPageViewModel.EnableControls}">
+                    <Button Text="Pick file and upload"
+                            Command="{Binding MainPageViewModel.Command_PickFileAndUpload}" />
+                    <Button Text="Get files"
+                            Command="{Binding MainPageViewModel.Command_GetFiles}" />
+                </StackLayout>
+
+                <Grid HeightRequest="100"
+                      BackgroundColor="#7FFDDE82">
+
+                    <Label Text="{Binding MainPageViewModel.Message}"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center" />
+
+                </Grid>
+            </StackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
