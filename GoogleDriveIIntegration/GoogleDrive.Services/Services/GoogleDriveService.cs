@@ -18,7 +18,7 @@ namespace GoogleDrive.Services.Services
 {
     public interface IGoogleDriveService
     {
-        Task WebLogin();
+        Task<bool> WebLogin();
         Task<string> CreateNewFile();
         Task<GoogleDriveFileModel> ReadFile(string fileId, string folderId = null);
         Task<byte[]> GetByteArrayFromFile(string filename, string folderId);
@@ -27,12 +27,15 @@ namespace GoogleDrive.Services.Services
         Task<List<GoogleDriveFileModel>> GetFiles(string folderId);
         Task<string> GetFileIdByName(string filename, string folderId);
         Task<List<GoogleDriveFileModel>> GetFoldersAsync();
+        Task<string> GetFolderIdByNameAsync(string folderName);
+        Task<string> CreateFolderAsync(string folderName);
         Task<bool> DeleteFileAsync(string fileId);
         Task<bool> RenameFileAsync(string fileId, string newName);
     }
 
     public class GoogleDriveService : IGoogleDriveService
     {
+        // oAuth client Client ID
         string _clientId = "334177818474-mc4kpcnp9g04ssd2hs13ei6jcvjlfdr1.apps.googleusercontent.com";
         string _redirectUri = "com.googleusercontent.apps.334177818474-mc4kpcnp9g04ssd2hs13ei6jcvjlfdr1:/oauth2redirect";
         string _scope = "https://www.googleapis.com/auth/drive.file";
@@ -46,8 +49,11 @@ namespace GoogleDrive.Services.Services
         }
 
         #region authentications
-        public async Task WebLogin()
+        public async Task<bool> WebLogin()
         {
+            var res = false;
+
+            // setup oAuth2 authentication
             var authenticator = new OAuth2Authenticator(
                 clientId: _clientId,
                 clientSecret: null,
@@ -59,19 +65,20 @@ namespace GoogleDrive.Services.Services
                 isUsingNativeUI: true
             );
 
-            //authenticator.Completed += OnAuthCompleted;
-            //authenticator.Error += OnAuthError;
-
             AuthenticationState.Authenticator = authenticator;
 
+            // Web Login
             var url = await authenticator.GetInitialUrlAsync();
             var authResult = await Xamarin.Essentials.WebAuthenticator.AuthenticateAsync
             (
                 url: url,
                 callbackUrl: new Uri(_redirectUri)
             );
-            var raw = UrlizedResult(authResult);
-            var authResponse = new AuthorizeResponse(raw);
+
+            // prep token request uri
+            var authUri = UrlizedResult(authResult);
+            // and authorize
+            var authResponse = new AuthorizeResponse(authUri);
             if (!authResponse.IsError)
             {
                 identSvc.Setup(
@@ -92,7 +99,11 @@ namespace GoogleDrive.Services.Services
                 );
 
                 authdata.Code = authResponse.Code;
+
+                res = true;
             }
+
+            return res;
         }
 
         private string UrlizedResult(WebAuthenticatorResult result)
@@ -118,6 +129,8 @@ namespace GoogleDrive.Services.Services
         {
             try
             {
+
+                // setup google authorization
                 var initializer = new GoogleAuthorizationCodeFlow.Initializer
                 {
                     ClientSecrets = new ClientSecrets()
@@ -127,8 +140,10 @@ namespace GoogleDrive.Services.Services
                 };
                 initializer.Scopes = new[] { scope };
                 initializer.DataStore = new FileDataStore("Google.Apis.Auth");
+
+                // auth flow
                 var flow = new GoogleAuthorizationCodeFlow(initializer);
-                var user = "DriveTest";
+                var user = "Unknown";
                 var token = new Google.Apis.Auth.OAuth2.Responses.TokenResponse()
                 {
                     AccessToken = accessToken,
@@ -137,19 +152,21 @@ namespace GoogleDrive.Services.Services
                     Scope = scope,
                     TokenType = tokenType
                 };
+
+                // creata a new user credential based on the TokenResponse
                 var userCredential = new UserCredential(flow, user, token);
+
+                // authorize the usage of Google Drive by 
+                // the given userCredential
                 drvSvc = new DriveService(new BaseClientService.Initializer()
                 {
                     HttpClientInitializer = userCredential,
-                    ApplicationName = "BackupTest",
+                    ApplicationName = "GoogleDriveIntegration",
                 });
-                //drvSvcHelper = new DriveServiceHelper(drvSvc);
-
-                //_isGoogleDriveEnabled = true;
             }
             catch (Exception ex)
             {
-                //_isGoogleDriveEnabled = false;
+                // something went wrong. 
             }
         }
         #endregion

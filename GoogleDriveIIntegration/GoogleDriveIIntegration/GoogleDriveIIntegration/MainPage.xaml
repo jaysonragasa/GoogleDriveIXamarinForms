@@ -7,23 +7,33 @@
 
     <StackLayout>
         <Frame BackgroundColor="#2196F3" Padding="24" CornerRadius="0">
-            <Label Text="Welcome to Xamarin.Forms!" HorizontalTextAlignment="Center" TextColor="White" FontSize="36"/>
+            <Label Text="Google Drive Integration Test" HorizontalTextAlignment="Center" TextColor="White" FontSize="36"/>
         </Frame>
-        <Label Text="Start developing now" FontSize="Title" Padding="30,10,30,10"/>
-        <Label Text="Make changes to your XAML file and save to see your UI update in the running app with XAML Hot Reload. Give it a try!" FontSize="16" Padding="30,0,30,0"/>
-        <Label FontSize="16" Padding="30,24,30,0">
-            <Label.FormattedText>
-                <FormattedString>
-                    <FormattedString.Spans>
-                        <Span Text="Learn more at "/>
-                        <Span Text="https://aka.ms/xamarin-quickstart" FontAttributes="Bold"/>
-                    </FormattedString.Spans>
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
-        <Button Text="Web Login"
-                Command="{Binding MainPageViewModel.Command_WebLogin}"
-                />
+
+        <StackLayout Margin="20,0">
+            <Button Text="Web Login"
+                    Command="{Binding MainPageViewModel.Command_WebLogin}"
+                    />
+
+            <StackLayout IsEnabled="{Binding MainPageViewModel.EnableControls}">
+                <Button Text="Pick file and upload" 
+                        Command="{Binding MainPageViewModel.Command_PickFileAndUpload}"
+                        />
+                <Button Text="Get files" 
+                        Command="{Binding MainPageViewModel.Command_GetFiles}"
+                        />
+            </StackLayout>
+
+            <Grid HeightRequest="100"
+                  BackgroundColor="#7FFDDE82">
+
+                <Label Text="{Binding MainPageViewModel.Message}" 
+                       VerticalOptions="Center"
+                       HorizontalOptions="Center"
+                       />
+
+            </Grid>
+        </StackLayout>
     </StackLayout>
 
 </ContentPage>

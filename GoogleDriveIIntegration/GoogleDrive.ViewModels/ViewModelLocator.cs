@@ -12,7 +12,7 @@ namespace GoogleDrive.ViewModels
             SimpleIoc.Default.Register<MainPageViewModel>();
 
             // services
-            SimpleIoc.Default.Register<IGoogleDriveService, GoogleDriveService>();
+            SimpleIoc.Default.Register<IGoogleDriveService, GoogleDriveService>(createInstanceImmediately: false);
         }
     }
 }
